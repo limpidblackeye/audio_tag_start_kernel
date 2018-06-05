@@ -402,59 +402,61 @@ if not COMPLETE_RUN:
 
 # ```python
 # PREDICTION_FOLDER = "predictions_1d_conv"
-# if not os.path.exists(PREDICTION_FOLDER):
-#     os.mkdir(PREDICTION_FOLDER)
-# if os.path.exists('logs/' + PREDICTION_FOLDER):
-#     shutil.rmtree('logs/' + PREDICTION_FOLDER)
-# 
-# skf = StratifiedKFold(train.label_idx, n_folds=config.n_folds)
-# 
-# for i, (train_split, val_split) in enumerate(skf):
-#     train_set = train.iloc[train_split]
-#     val_set = train.iloc[val_split]
-#     checkpoint = ModelCheckpoint('best_%d.h5'%i, monitor='val_loss', verbose=1, save_best_only=True)
-#     early = EarlyStopping(monitor="val_loss", mode="min", patience=5)
-#     tb = TensorBoard(log_dir='./logs/' + PREDICTION_FOLDER + '/fold_%d'%i, write_graph=True)
-# 
-#     callbacks_list = [checkpoint, early, tb]
-#     print("Fold: ", i)
-#     print("#"*50)
-#     if COMPLETE_RUN:
-#         model = get_1d_conv_model(config)
-#     else:
-#         model = get_1d_dummy_model(config)
-# 
-#     train_generator = DataGenerator(config, '../input/freesound-audio-tagging/audio_train/', train_set.index, 
-#                                     train_set.label_idx, batch_size=64,
-#                                     preprocessing_fn=audio_norm)
-#     val_generator = DataGenerator(config, '../input/freesound-audio-tagging/audio_train/', val_set.index, 
-#                                   val_set.label_idx, batch_size=64,
-#                                   preprocessing_fn=audio_norm)
-#     
-#     history = model.fit_generator(train_generator, callbacks=callbacks_list, validation_data=val_generator,
-#                                   epochs=config.max_epochs, use_multiprocessing=True, workers=6, max_queue_size=20)
-#     
-#     model.load_weights('best_%d.h5'%i)
-#     
-#     # Save train predictions
-#     train_generator = DataGenerator(config, '../input/freesound-audio-tagging/audio_train/', train.index, batch_size=128,
-#                                     preprocessing_fn=audio_norm)
-#     predictions = model.predict_generator(train_generator, use_multiprocessing=True, 
-#                                           workers=6, max_queue_size=20, verbose=1)
-#     np.save(PREDICTION_FOLDER + "/train_predictions_%d.npy"%i, predictions)
-#     
-#     # Save test predictions
-#     test_generator = DataGenerator(config, '../input/freesound-audio-tagging/audio_test/', test.index, batch_size=128,
-#                                     preprocessing_fn=audio_norm)
-#     predictions = model.predict_generator(test_generator, use_multiprocessing=True, 
-#                                           workers=6, max_queue_size=20, verbose=1)
-#     np.save(PREDICTION_FOLDER + "/test_predictions_%d.npy"%i, predictions)
-#     
-#     # Make a submission file
-#     top_3 = np.array(LABELS)[np.argsort(-predictions, axis=1)[:, :3]]
-#     predicted_labels = [' '.join(list(x)) for x in top_3]
-#     test['label'] = predicted_labels
-#     test[['label']].to_csv(PREDICTION_FOLDER + "/predictions_%d.csv"%i)
+PREDICTION_FOLDER = "freesound-prediction-file"
+
+if not os.path.exists(PREDICTION_FOLDER):
+    os.mkdir(PREDICTION_FOLDER)
+if os.path.exists('logs/' + PREDICTION_FOLDER):
+    shutil.rmtree('logs/' + PREDICTION_FOLDER)
+
+skf = StratifiedKFold(train.label_idx, n_folds=config.n_folds)
+
+for i, (train_split, val_split) in enumerate(skf):
+    train_set = train.iloc[train_split]
+    val_set = train.iloc[val_split]
+    checkpoint = ModelCheckpoint('best_%d.h5'%i, monitor='val_loss', verbose=1, save_best_only=True)
+    early = EarlyStopping(monitor="val_loss", mode="min", patience=5)
+    tb = TensorBoard(log_dir='./logs/' + PREDICTION_FOLDER + '/fold_%d'%i, write_graph=True)
+
+    callbacks_list = [checkpoint, early, tb]
+    print("Fold: ", i)
+    print("#"*50)
+    if COMPLETE_RUN:
+        model = get_1d_conv_model(config)
+    else:
+        model = get_1d_dummy_model(config)
+
+    train_generator = DataGenerator(config, '../../data/audio_train/', train_set.index, 
+                                    train_set.label_idx, batch_size=64,
+                                    preprocessing_fn=audio_norm)
+    val_generator = DataGenerator(config, '../../data/audio_train/', val_set.index, 
+                                  val_set.label_idx, batch_size=64,
+                                  preprocessing_fn=audio_norm)
+    
+    history = model.fit_generator(train_generator, callbacks=callbacks_list, validation_data=val_generator,
+                                  epochs=config.max_epochs, use_multiprocessing=True, workers=6, max_queue_size=20)
+    
+    model.load_weights('best_%d.h5'%i)
+    
+    # Save train predictions
+    train_generator = DataGenerator(config, '../../data/audio_train/', train.index, batch_size=128,
+                                    preprocessing_fn=audio_norm)
+    predictions = model.predict_generator(train_generator, use_multiprocessing=True, 
+                                          workers=6, max_queue_size=20, verbose=1)
+    np.save(PREDICTION_FOLDER + "/train_predictions_%d.npy"%i, predictions)
+    
+    # Save test predictions
+    test_generator = DataGenerator(config, '../../data/audio_test/', test.index, batch_size=128,
+                                    preprocessing_fn=audio_norm)
+    predictions = model.predict_generator(test_generator, use_multiprocessing=True, 
+                                          workers=6, max_queue_size=20, verbose=1)
+    np.save(PREDICTION_FOLDER + "/test_predictions_%d.npy"%i, predictions)
+    
+    # Make a submission file
+    top_3 = np.array(LABELS)[np.argsort(-predictions, axis=1)[:, :3]]
+    predicted_labels = [' '.join(list(x)) for x in top_3]
+    test['label'] = predicted_labels
+    test[['label']].to_csv(PREDICTION_FOLDER + "/predictions_%d.csv"%i)
 #     ```
 
 # <a id="1d_ensembling"></a>
@@ -606,62 +608,58 @@ def prepare_data(df, config, data_dir):
     return X
 
 
-# ```python
-# X_train = prepare_data(train, config, '../input/freesound-audio-tagging/audio_train/')
-# X_test = prepare_data(test, config, '../input/freesound-audio-tagging/audio_test/')
-# y_train = to_categorical(train.label_idx, num_classes=config.n_classes)
-# ```
+X_train = prepare_data(train, config, '../../data/audio_train/')
+X_test = prepare_data(test, config, '../../data/audio_test/')
+y_train = to_categorical(train.label_idx, num_classes=config.n_classes)
+
 
 # <a id="2d_normalization"></a>
 # #### Normalization
 # 
 
-# ```python
-# mean = np.mean(X_train, axis=0)
-# std = np.std(X_train, axis=0)
-# 
-# X_train = (X_train - mean)/std
-# X_test = (X_test - mean)/std
-# ```
+mean = np.mean(X_train, axis=0)
+std = np.std(X_train, axis=0)
 
-# <a id="2d_training"></a>
+X_train = (X_train - mean)/std
+X_test = (X_test - mean)/std
+
 # #### Training 2D Conv on MFCC
 
-# ```python
 # PREDICTION_FOLDER = "predictions_2d_conv"
-# if not os.path.exists(PREDICTION_FOLDER):
-#     os.mkdir(PREDICTION_FOLDER)
-# if os.path.exists('logs/' + PREDICTION_FOLDER):
-#     shutil.rmtree('logs/' + PREDICTION_FOLDER)
-# 
-# skf = StratifiedKFold(train.label_idx, n_folds=config.n_folds)
-# for i, (train_split, val_split) in enumerate(skf):
-#     K.clear_session()
-#     X, y, X_val, y_val = X_train[train_split], y_train[train_split], X_train[val_split], y_train[val_split]
-#     checkpoint = ModelCheckpoint('best_%d.h5'%i, monitor='val_loss', verbose=1, save_best_only=True)
-#     early = EarlyStopping(monitor="val_loss", mode="min", patience=5)
-#     tb = TensorBoard(log_dir='./logs/' + PREDICTION_FOLDER + '/fold_%i'%i, write_graph=True)
-#     callbacks_list = [checkpoint, early, tb]
-#     print("#"*50)
-#     print("Fold: ", i)
-#     model = get_2d_conv_model(config)
-#     history = model.fit(X, y, validation_data=(X_val, y_val), callbacks=callbacks_list, 
-#                         batch_size=64, epochs=config.max_epochs)
-#     model.load_weights('best_%d.h5'%i)
-# 
-#     # Save train predictions
-#     predictions = model.predict(X_train, batch_size=64, verbose=1)
-#     np.save(PREDICTION_FOLDER + "/train_predictions_%d.npy"%i, predictions)
-# 
-#     # Save test predictions
-#     predictions = model.predict(X_test, batch_size=64, verbose=1)
-#     np.save(PREDICTION_FOLDER + "/test_predictions_%d.npy"%i, predictions)
-# 
-#     # Make a submission file
-#     top_3 = np.array(LABELS)[np.argsort(-predictions, axis=1)[:, :3]]
-#     predicted_labels = [' '.join(list(x)) for x in top_3]
-#     test['label'] = predicted_labels
-#     test[['label']].to_csv(PREDICTION_FOLDER + "/predictions_%d.csv"%i)
+PREDICTION_FOLDER = "freesound-prediction-data-2d-conv-reduced-lr"
+if not os.path.exists(PREDICTION_FOLDER):
+    os.mkdir(PREDICTION_FOLDER)
+if os.path.exists('logs/' + PREDICTION_FOLDER):
+    shutil.rmtree('logs/' + PREDICTION_FOLDER)
+
+skf = StratifiedKFold(train.label_idx, n_folds=config.n_folds)
+for i, (train_split, val_split) in enumerate(skf):
+    K.clear_session()
+    X, y, X_val, y_val = X_train[train_split], y_train[train_split], X_train[val_split], y_train[val_split]
+    checkpoint = ModelCheckpoint('best_%d.h5'%i, monitor='val_loss', verbose=1, save_best_only=True)
+    early = EarlyStopping(monitor="val_loss", mode="min", patience=5)
+    tb = TensorBoard(log_dir='./logs/' + PREDICTION_FOLDER + '/fold_%i'%i, write_graph=True)
+    callbacks_list = [checkpoint, early, tb]
+    print("#"*50)
+    print("Fold: ", i)
+    model = get_2d_conv_model(config)
+    history = model.fit(X, y, validation_data=(X_val, y_val), callbacks=callbacks_list, 
+                        batch_size=64, epochs=config.max_epochs)
+    model.load_weights('best_%d.h5'%i)
+
+    # Save train predictions
+    predictions = model.predict(X_train, batch_size=64, verbose=1)
+    np.save(PREDICTION_FOLDER + "/train_predictions_%d.npy"%i, predictions)
+
+    # Save test predictions
+    predictions = model.predict(X_test, batch_size=64, verbose=1)
+    np.save(PREDICTION_FOLDER + "/test_predictions_%d.npy"%i, predictions)
+
+    # Make a submission file
+    top_3 = np.array(LABELS)[np.argsort(-predictions, axis=1)[:, :3]]
+    predicted_labels = [' '.join(list(x)) for x in top_3]
+    test['label'] = predicted_labels
+    test[['label']].to_csv(PREDICTION_FOLDER + "/predictions_%d.csv"%i)
 # ```
 
 # <a id="2d_ensembling"></a>
