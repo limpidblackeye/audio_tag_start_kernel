@@ -33,14 +33,11 @@
 # 6. [Results and Conclusion](#conclusion)
 # 
 # 
-# <a id="eda"></a>
-# ## <center>1. Exploratory Data Analysis</center>
+# ## 1. Exploratory Data Analysis
 
 # Change this to True to replicate the result
-COMPLETE_RUN = True
+COMPLETE_RUN = False
 
-
-# <a id="loading_data"></a>
 # ### Loading data
 
 import numpy as np
@@ -57,29 +54,21 @@ import seaborn as sns
 from tqdm import tqdm_notebook
 from sklearn.cross_validation import StratifiedKFold
 
-# get_ipython().run_line_magic('matplotlib', 'inline')
-# matplotlib.style.use('ggplot')
-
 train = pd.read_csv("../../data/train.csv")
 test = pd.read_csv("./sample_submission.csv")
 
 train.head()
 
-
 print("Number of training examples=", train.shape[0], "  Number of classes=", len(train.label.unique()))
-
 
 print(train.label.unique())
 
-
-# <a id="distribution"></a>
 # ### Distribution of Categories
 
 category_group = train.groupby(['label', 'manually_verified']).count()
 plot = category_group.unstack().reindex(category_group.unstack().sum(axis=1).sort_values().index)          .plot(kind='bar', stacked=True, title="Number of Audio Samples per Category", figsize=(16,10))
 plot.set_xlabel("Category")
 plot.set_ylabel("Number of Samples");
-
 
 print('Minimum samples per category = ', min(train.label.value_counts()))
 print('Maximum samples per category = ', max(train.label.value_counts()))
@@ -125,18 +114,13 @@ print(data)
 
 plt.plot(data, '-', );
 
-
 # Let's zoom in on first 1000 frames
 
 plt.figure(figsize=(16, 4))
 plt.plot(data[:500], '.'); plt.plot(data[:500], '-');
 
-
-# <a id="audio_length"></a>
-# ### Audio Length
-# 
+# ### Audio Length 
 # We shall now analyze the lengths of the audio files in our dataset
-
 train['nframes'] = train['fname'].apply(lambda f: wave.open('../../data/audio_train/' + f).getnframes())
 test['nframes'] = test['fname'].apply(lambda f: wave.open('../../data/audio_test/' + f).getnframes())
 
@@ -156,7 +140,7 @@ fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(16,5))
 train.nframes.hist(bins=100, ax=axes[0])
 test.nframes.hist(bins=100, ax=axes[1])
 plt.suptitle('Frame Length Distribution in Train and Test', ha='center', fontsize='large');
-
+plt.show()
 
 # We observe:
 # 1. Majority of the audio files are short.
@@ -385,7 +369,6 @@ if not COMPLETE_RUN:
     train = train[:2000]
     test = test[:2000]
 
-
 config = Config(sampling_rate=16000, audio_duration=2, n_folds=10, learning_rate=0.001)
 if not COMPLETE_RUN:
     config = Config(sampling_rate=100, audio_duration=1, n_folds=2, max_epochs=1)
@@ -414,7 +397,7 @@ skf = StratifiedKFold(train.label_idx, n_folds=config.n_folds)
 for i, (train_split, val_split) in enumerate(skf):
     train_set = train.iloc[train_split]
     val_set = train.iloc[val_split]
-    checkpoint = ModelCheckpoint('best_%d.h5'%i, monitor='val_loss', verbose=1, save_best_only=True)
+    checkpoint = ModelCheckpoint(PREDICTION_FOLDER+'/best_%d.h5'%i, monitor='val_loss', verbose=1, save_best_only=True)
     early = EarlyStopping(monitor="val_loss", mode="min", patience=5)
     tb = TensorBoard(log_dir='./logs/' + PREDICTION_FOLDER + '/fold_%d'%i, write_graph=True)
 
@@ -436,7 +419,7 @@ for i, (train_split, val_split) in enumerate(skf):
     history = model.fit_generator(train_generator, callbacks=callbacks_list, validation_data=val_generator,
                                   epochs=config.max_epochs, use_multiprocessing=True, workers=6, max_queue_size=20)
     
-    model.load_weights('best_%d.h5'%i)
+    model.load_weights(PREDICTION_FOLDER+'/best_%d.h5'%i)
     
     # Save train predictions
     train_generator = DataGenerator(config, '../../data/audio_train/', train.index, batch_size=128,
@@ -636,7 +619,7 @@ skf = StratifiedKFold(train.label_idx, n_folds=config.n_folds)
 for i, (train_split, val_split) in enumerate(skf):
     K.clear_session()
     X, y, X_val, y_val = X_train[train_split], y_train[train_split], X_train[val_split], y_train[val_split]
-    checkpoint = ModelCheckpoint('best_%d.h5'%i, monitor='val_loss', verbose=1, save_best_only=True)
+    checkpoint = ModelCheckpoint(PREDICTION_FOLDER+'/best_%d.h5'%i, monitor='val_loss', verbose=1, save_best_only=True)
     early = EarlyStopping(monitor="val_loss", mode="min", patience=5)
     tb = TensorBoard(log_dir='./logs/' + PREDICTION_FOLDER + '/fold_%i'%i, write_graph=True)
     callbacks_list = [checkpoint, early, tb]
@@ -645,7 +628,7 @@ for i, (train_split, val_split) in enumerate(skf):
     model = get_2d_conv_model(config)
     history = model.fit(X, y, validation_data=(X_val, y_val), callbacks=callbacks_list, 
                         batch_size=64, epochs=config.max_epochs)
-    model.load_weights('best_%d.h5'%i)
+    model.load_weights(PREDICTION_FOLDER+'/best_%d.h5'%i)
 
     # Save train predictions
     predictions = model.predict(X_train, batch_size=64, verbose=1)
