@@ -33,7 +33,8 @@
 # 6. [Results and Conclusion](#conclusion)
 # 
 # 
-# ## 1. Exploratory Data Analysis
+
+#### ==================== 1. Exploratory Data Analysis ==================== ####
 
 # Change this to True to replicate the result
 COMPLETE_RUN = False
@@ -287,7 +288,7 @@ class DataGenerator(Sequence):
         else:
             return X
 
-
+#### ==================== model 1 ==================== ####
 # <a id="1d_normalization"></a>
 # #### Normalization
 # 
@@ -458,10 +459,10 @@ top_3 = np.array(LABELS)[np.argsort(-prediction, axis=1)[:, :3]]
 predicted_labels = [' '.join(list(x)) for x in top_3]
 test = pd.read_csv('./sample_submission.csv')
 test['label'] = predicted_labels
-test[['fname', 'label']].to_csv("1d_conv_ensembled_submission.csv", index=False)
+test[['fname', 'label']].to_csv("./freesound-prediction-file/1d_conv_ensembled_submission.csv", index=False)
 
 
-# <a id="intro_mfcc"></a>
+#### ==================== MFCC ==================== ####
 # ## <center> 3. Introuction to MFCC
 # 
 # As we have seen in the previous section, our Deep Learning models are powerful enough to classify sounds from the raw audio. We do not require any complex feature engineering. But before the Deep Learning era, people developed techniques to extract features from audio signals. It turns out that these techniques are still useful. One such technique is computing the MFCC (Mel Frquency Cepstral Coefficients) from the raw audio. Before we jump to MFCC, let's talk about extracting features from the sound.
@@ -489,7 +490,7 @@ mfcc.shape
 plt.imshow(mfcc, cmap='hot', interpolation='nearest');
 
 
-# <a id="2d_model_building"></a>
+#### ==================== model2 ===================== ####
 # ## <center>4. Building a Model using MFCC
 # 
 # We will build now build a 2D Convolutional model using MFCC. 
@@ -551,7 +552,6 @@ def get_2d_conv_model(config):
 
     model.compile(optimizer=opt, loss=losses.categorical_crossentropy, metrics=['acc'])
     return model
-
 
 # <a id="2d_data"></a>
 # ### Preparing data
@@ -660,7 +660,7 @@ top_3 = np.array(LABELS)[np.argsort(-prediction, axis=1)[:, :3]]
 predicted_labels = [' '.join(list(x)) for x in top_3]
 test = pd.read_csv('./sample_submission.csv')
 test['label'] = predicted_labels
-test[['fname', 'label']].to_csv("2d_conv_ensembled_submission.csv", index=False)
+test[['fname', 'label']].to_csv("./freesound-prediction-data-2d-conv-reduced-lr/2d_conv_ensembled_submission.csv", index=False)
 
 
 # <a id="1d_2d_ensembling"></a>
