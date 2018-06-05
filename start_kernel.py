@@ -128,7 +128,7 @@ _, ax = plt.subplots(figsize=(16, 4))
 sns.violinplot(ax=ax, x="label", y="nframes", data=train)
 plt.xticks(rotation=90)
 plt.title('Distribution of audio frames, per label', fontsize=16)
-plt.show()
+# plt.show()
 
 
 # We observe:
@@ -140,7 +140,7 @@ fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(16,5))
 train.nframes.hist(bins=100, ax=axes[0])
 test.nframes.hist(bins=100, ax=axes[1])
 plt.suptitle('Frame Length Distribution in Train and Test', ha='center', fontsize='large');
-plt.show()
+# plt.show()
 
 # We observe:
 # 1. Majority of the audio files are short.
@@ -486,7 +486,6 @@ wav = wav[:2*44100]
 mfcc = librosa.feature.mfcc(wav, sr = SAMPLE_RATE, n_mfcc=40)
 mfcc.shape
 
-
 plt.imshow(mfcc, cmap='hot', interpolation='nearest');
 
 
@@ -668,9 +667,9 @@ test[['fname', 'label']].to_csv("2d_conv_ensembled_submission.csv", index=False)
 # ## <center>5. Ensembling 1D Conv and 2D Conv Predictions</center>
 
 pred_list = []
-for i in range(10):
+for i in range(config.n_folds):
     pred_list.append(np.load("./freesound-prediction-data-2d-conv-reduced-lr/test_predictions_%d.npy"%i))
-for i in range(10):
+for i in range(config.n_folds):
     pred_list.append(np.load("./freesound-prediction-file/test_predictions_%d.npy"%i))
 prediction = np.ones_like(pred_list[0])
 for pred in pred_list:
