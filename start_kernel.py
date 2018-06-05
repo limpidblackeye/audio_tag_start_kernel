@@ -365,9 +365,9 @@ label_idx = {label: i for i, label in enumerate(LABELS)}
 train.set_index("fname", inplace=True)
 test.set_index("fname", inplace=True)
 train["label_idx"] = train.label.apply(lambda x: label_idx[x])
-if not COMPLETE_RUN:
-    train = train[:2000]
-    test = test[:2000]
+# if not COMPLETE_RUN:
+#     train = train[:2000]
+#     test = test[:2000]
 
 config = Config(sampling_rate=16000, audio_duration=2, n_folds=10, learning_rate=0.001)
 if not COMPLETE_RUN:
