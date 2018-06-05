@@ -447,7 +447,7 @@ for i, (train_split, val_split) in enumerate(skf):
 # Now that we have trained our model, it is time average the predictions of 10-folds. We will try Geometric Mean averaging and see what will be our Public LB score.
 
 pred_list = []
-for i in range(10):
+for i in range(config.n_folds):
     pred_list.append(np.load("./freesound-prediction-file/test_predictions_%d.npy"%i))
 prediction = np.ones_like(pred_list[0])
 for pred in pred_list:
@@ -649,7 +649,7 @@ for i, (train_split, val_split) in enumerate(skf):
 # #### Ensembling 2D Conv Predictions
 
 pred_list = []
-for i in range(10):
+for i in range(config.n_folds):
     pred_list.append(np.load("./freesound-prediction-data-2d-conv-reduced-lr/test_predictions_%d.npy"%i))
 prediction = np.ones_like(pred_list[0])
 for pred in pred_list:
