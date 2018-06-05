@@ -47,12 +47,12 @@ np.random.seed(1001)
 import os
 import shutil
 
-import IPython
-import matplotlib
-import matplotlib.pyplot as plt
+# import IPython
+# import matplotlib
+# import matplotlib.pyplot as plt
 import pandas as pd
-import seaborn as sns
-from tqdm import tqdm_notebook
+# import seaborn as sns
+# from tqdm import tqdm_notebook
 from sklearn.cross_validation import StratifiedKFold
 
 train = pd.read_csv("../../data/train.csv")
@@ -195,7 +195,7 @@ from keras.utils import Sequence, to_categorical
 
 class Config(object):
     def __init__(self,
-                 sampling_rate=16000, audio_duration=2, n_classes=41,
+                 sampling_rate=16000, audio_duration=1, n_classes=41,
                  use_mfcc=False, n_folds=10, learning_rate=0.0001, 
                  max_epochs=50, n_mfcc=20):
         self.sampling_rate = sampling_rate
@@ -370,7 +370,7 @@ train["label_idx"] = train.label.apply(lambda x: label_idx[x])
 #     train = train[:2000]
 #     test = test[:2000]
 
-config = Config(sampling_rate=16000, audio_duration=2, n_folds=10, learning_rate=0.001)
+config = Config(sampling_rate=16000, audio_duration=1, n_folds=10, learning_rate=0.001)
 if not COMPLETE_RUN:
     config = Config(sampling_rate=100, audio_duration=1, n_folds=2, max_epochs=1)
 
@@ -557,7 +557,7 @@ def get_2d_conv_model(config):
 # <a id="2d_data"></a>
 # ### Preparing data
 
-config = Config(sampling_rate=44100, audio_duration=2, n_folds=10, 
+config = Config(sampling_rate=44100, audio_duration=1, n_folds=10, 
                 learning_rate=0.001, use_mfcc=True, n_mfcc=40)
 if not COMPLETE_RUN:
     config = Config(sampling_rate=44100, audio_duration=2, n_folds=2, 
