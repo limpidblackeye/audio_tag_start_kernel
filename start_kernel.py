@@ -64,6 +64,7 @@ print("Number of training examples=", train.shape[0], "  Number of classes=", le
 
 print(train.label.unique())
 
+'''
 # ### Distribution of Categories
 
 category_group = train.groupby(['label', 'manually_verified']).count()
@@ -73,7 +74,7 @@ plot.set_ylabel("Number of Samples");
 
 print('Minimum samples per category = ', min(train.label.value_counts()))
 print('Maximum samples per category = ', max(train.label.value_counts()))
-
+'''
 
 # We observe that:
 # 1. The number of audio samples per category is **non-nform**. The minimum number of audio samples in a category is `94` while the maximum is `300`
@@ -90,11 +91,11 @@ print('Maximum samples per category = ', max(train.label.value_counts()))
 # 
 # Let's listen to an audio file in our dataset and load it to a numpy array
 
-import IPython.display as ipd  # To play sound in the notebook
-fname = '../../data/audio_train/' + '00044347.wav'   # Hi-hat
-ipd.Audio(fname)
+# import IPython.display as ipd  # To play sound in the notebook
+# fname = '../../data/audio_train/' + '00044347.wav'   # Hi-hat
+# ipd.Audio(fname)
 
-
+'''
 # Using wave library
 import wave
 wav = wave.open(fname)
@@ -142,11 +143,12 @@ train.nframes.hist(bins=100, ax=axes[0])
 test.nframes.hist(bins=100, ax=axes[1])
 plt.suptitle('Frame Length Distribution in Train and Test', ha='center', fontsize='large');
 # plt.show()
+'''
 
 # We observe:
 # 1. Majority of the audio files are short.
 # 1. There are four `abnormal` length in the test histogram. Let's analyze them.
-
+'''
 abnormal_length = [707364, 353682, 138474, 184338]
 
 for length in abnormal_length:
@@ -155,7 +157,7 @@ for length in abnormal_length:
     fname = np.random.choice(abnormal_fnames)
     print("Playing ", fname)
     IPython.display.display(ipd.Audio( '../../data/audio_test/' + fname))
-
+'''
 
 # <a id="1d_model_building"></a>
 # ## <center>2. Building a Model using Raw Wave</center>
