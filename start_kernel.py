@@ -370,7 +370,7 @@ train["label_idx"] = train.label.apply(lambda x: label_idx[x])
 #     train = train[:2000]
 #     test = test[:2000]
 
-config = Config(sampling_rate=16000, audio_duration=2, n_folds=1, learning_rate=0.001)
+config = Config(sampling_rate=16000, audio_duration=2, n_folds=3, learning_rate=0.001)
 if not COMPLETE_RUN:
     config = Config(sampling_rate=100, audio_duration=1, n_folds=2, max_epochs=1)
 
@@ -557,7 +557,7 @@ def get_2d_conv_model(config):
 # <a id="2d_data"></a>
 # ### Preparing data
 
-config = Config(sampling_rate=44100, audio_duration=2, n_folds=1, 
+config = Config(sampling_rate=44100, audio_duration=2, n_folds=3, 
                 learning_rate=0.001, use_mfcc=True, n_mfcc=40)
 if not COMPLETE_RUN:
     config = Config(sampling_rate=44100, audio_duration=2, n_folds=2, 
