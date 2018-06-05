@@ -57,13 +57,11 @@ import seaborn as sns
 from tqdm import tqdm_notebook
 from sklearn.cross_validation import StratifiedKFold
 
-get_ipython().run_line_magic('matplotlib', 'inline')
-matplotlib.style.use('ggplot')
-
+# get_ipython().run_line_magic('matplotlib', 'inline')
+# matplotlib.style.use('ggplot')
 
 train = pd.read_csv("../../data/train.csv")
 test = pd.read_csv("./sample_submission.csv")
-
 
 train.head()
 
