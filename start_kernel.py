@@ -37,7 +37,7 @@
 # ## <center>1. Exploratory Data Analysis</center>
 
 # Change this to True to replicate the result
-COMPLETE_RUN = False
+COMPLETE_RUN = True
 
 
 # <a id="loading_data"></a>
