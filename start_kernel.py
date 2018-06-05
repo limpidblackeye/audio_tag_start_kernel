@@ -37,7 +37,7 @@
 #### ==================== 1. Exploratory Data Analysis ==================== ####
 
 # Change this to True to replicate the result
-COMPLETE_RUN = False
+COMPLETE_RUN = True
 
 # ### Loading data
 
@@ -395,6 +395,7 @@ if os.path.exists('logs/' + PREDICTION_FOLDER):
 
 skf = StratifiedKFold(train.label_idx, n_folds=config.n_folds)
 
+print("==========1d-conv=========")
 for i, (train_split, val_split) in enumerate(skf):
     train_set = train.iloc[train_split]
     val_set = train.iloc[val_split]
@@ -403,8 +404,8 @@ for i, (train_split, val_split) in enumerate(skf):
     tb = TensorBoard(log_dir='./logs/' + PREDICTION_FOLDER + '/fold_%d'%i, write_graph=True)
 
     callbacks_list = [checkpoint, early, tb]
-    print("Fold: ", i)
     print("#"*50)
+    print("Fold: ", i)
     if COMPLETE_RUN:
         model = get_1d_conv_model(config)
     else:
@@ -615,6 +616,7 @@ if not os.path.exists(PREDICTION_FOLDER):
 if os.path.exists('logs/' + PREDICTION_FOLDER):
     shutil.rmtree('logs/' + PREDICTION_FOLDER)
 
+print("==========2d-conv=========")
 skf = StratifiedKFold(train.label_idx, n_folds=config.n_folds)
 for i, (train_split, val_split) in enumerate(skf):
     K.clear_session()
