@@ -213,7 +213,6 @@ class Config(object):
         else:
             self.dim = (self.audio_length, 1)
 
-
 # <a id="data_generator"></a>
 # #### DataGenerator Class
 
@@ -301,7 +300,6 @@ def audio_norm(data):
     min_data = np.min(data)
     data = (data-min_data)/(max_data-min_data+1e-6)
     return data-0.5
-
 
 # * The dummy model is just for debugging purpose.
 # * Our 1D Conv model is fairly deep and is trained using Adam Optimizer with a learning rate of 0.0001
@@ -481,17 +479,17 @@ test[['fname', 'label']].to_csv("./freesound-prediction-file/1d_conv_ensembled_s
 # The library librosa has a function to calculate MFCC. Let's compute the MFCC of an audio file and visualize it.
 
 import librosa
+'''
 SAMPLE_RATE = 44100
 fname = '../../data/audio_train/' + '00044347.wav'   # Hi-hat
 wav, _ = librosa.core.load(fname, sr=SAMPLE_RATE)
 wav = wav[:2*44100]
 
-
 mfcc = librosa.feature.mfcc(wav, sr = SAMPLE_RATE, n_mfcc=40)
 mfcc.shape
 
 plt.imshow(mfcc, cmap='hot', interpolation='nearest');
-
+'''
 
 #### ==================== model2 ===================== ####
 # ## <center>4. Building a Model using MFCC
