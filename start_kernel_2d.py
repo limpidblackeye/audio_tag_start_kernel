@@ -117,7 +117,7 @@ def get_2d_conv_model(config):
     return model
 
 config = Config(sampling_rate=44100, audio_duration=2, n_folds=10, 
-                learning_rate=0.001, use_mfcc=True, n_mfcc=40)
+                learning_rate=0.0001, use_mfcc=True, n_mfcc=40)
 if not COMPLETE_RUN:
     config = Config(sampling_rate=44100, audio_duration=2, n_folds=2, 
                     max_epochs=1, use_mfcc=True, n_mfcc=40)
@@ -216,7 +216,7 @@ for i, (train_split, val_split) in enumerate(skf):
 
 # #### Ensembling 2D Conv Predictions
 pred_list = []
-for i in range(config.n_folds):
+for i in range(10):
     pred_list.append(np.load("./"+PREDICTION_FOLDER+"/test_predictions_%d.npy"%i))
 prediction = np.ones_like(pred_list[0])
 for pred in pred_list:
