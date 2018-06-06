@@ -118,7 +118,7 @@ def get_2d_conv_model(config):
     return model
 
 config = Config(sampling_rate=44100, audio_duration=2, n_folds=10, 
-                learning_rate=0.0001, use_mfcc=True, n_mfcc=40)
+                learning_rate=0.001, use_mfcc=True, n_mfcc=40)
 if not COMPLETE_RUN:
     config = Config(sampling_rate=44100, audio_duration=2, n_folds=2, 
                     max_epochs=1, use_mfcc=True, n_mfcc=40)
