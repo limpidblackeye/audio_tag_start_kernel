@@ -154,6 +154,7 @@ def prepare_data(df, config, data_dir):
             X[i,] = data
     return X
 
+print("start preparing data ...")
 X_train = prepare_data(train, config, '../../data/audio_train/')
 X_test = prepare_data(test, config, '../../data/audio_test/')
 y_train = to_categorical(train.label_idx, num_classes=config.n_classes)
@@ -189,7 +190,7 @@ for i, (train_split, val_split) in enumerate(skf):
     K.clear_session()
     X, y, X_val, y_val = X_train[train_split], y_train[train_split], X_train[val_split], y_train[val_split]
     checkpoint = ModelCheckpoint(PREDICTION_FOLDER+'/best_%d.h5'%i, monitor='val_loss', verbose=1, save_best_only=True)
-    early = EarlyStopping(monitor="val_loss", mode="min", patience=10)
+    early = EarlyStopping(monitor="val_loss", mode="min", patience=20)
     tb = TensorBoard(log_dir='./logs/' + PREDICTION_FOLDER + '/fold_%i'%i, write_graph=True)
     callbacks_list = [checkpoint, early, tb]
     print("#"*50)
