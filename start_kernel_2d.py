@@ -111,7 +111,8 @@ def get_2d_conv_model(config):
     out = Dense(nclass, activation=softmax)(x)
 
     model = models.Model(inputs=inp, outputs=out)
-    opt = optimizers.Adam(config.learning_rate)
+    # opt = optimizers.Adam(config.learning_rate)
+    opt = optimizers.SGD(lr=config.learning_rate, momentum=0.8, decay=0.9, nesterov=False)
 
     model.compile(optimizer=opt, loss=losses.categorical_crossentropy, metrics=['acc'])
     return model
