@@ -195,7 +195,7 @@ from keras.utils import Sequence, to_categorical
 
 class Config(object):
     def __init__(self,
-                 sampling_rate=16000, audio_duration=1, n_classes=41,
+                 sampling_rate=16000, audio_duration=2, n_classes=41,
                  use_mfcc=False, n_folds=10, learning_rate=0.0001, 
                  max_epochs=50, n_mfcc=20):
         self.sampling_rate = sampling_rate
@@ -355,7 +355,6 @@ def get_1d_conv_model(config):
     model.compile(optimizer=opt, loss=losses.categorical_crossentropy, metrics=['acc'])
     return model
 
-
 # <a id="1d_training"></a>
 # #### Training 1D Conv
 
@@ -370,7 +369,7 @@ train["label_idx"] = train.label.apply(lambda x: label_idx[x])
 #     train = train[:2000]
 #     test = test[:2000]
 
-config = Config(sampling_rate=16000, audio_duration=1, n_folds=10, learning_rate=0.001)
+config = Config(sampling_rate=16000, audio_duration=2, n_folds=10, learning_rate=0.001)
 if not COMPLETE_RUN:
     config = Config(sampling_rate=100, audio_duration=1, n_folds=2, max_epochs=1)
 
@@ -557,7 +556,7 @@ def get_2d_conv_model(config):
 # <a id="2d_data"></a>
 # ### Preparing data
 
-config = Config(sampling_rate=44100, audio_duration=1, n_folds=10, 
+config = Config(sampling_rate=44100, audio_duration=2, n_folds=10, 
                 learning_rate=0.001, use_mfcc=True, n_mfcc=40)
 if not COMPLETE_RUN:
     config = Config(sampling_rate=44100, audio_duration=2, n_folds=2, 
@@ -568,7 +567,7 @@ def prepare_data(df, config, data_dir):
     X = np.empty(shape=(df.shape[0], config.dim[0], config.dim[1], 1))
     input_length = config.audio_length
     for i, fname in enumerate(df.index):
-        print(fname)
+        # print(fname)
         if ".wav" in str(fname):
             file_path = data_dir + fname
             data, _ = librosa.core.load(file_path, sr=config.sampling_rate, res_type="kaiser_fast")
@@ -622,7 +621,7 @@ for i, (train_split, val_split) in enumerate(skf):
     K.clear_session()
     X, y, X_val, y_val = X_train[train_split], y_train[train_split], X_train[val_split], y_train[val_split]
     checkpoint = ModelCheckpoint(PREDICTION_FOLDER+'/best_%d.h5'%i, monitor='val_loss', verbose=1, save_best_only=True)
-    early = EarlyStopping(monitor="val_loss", mode="min", patience=5)
+    early = EarlyStopping(monitor="val_loss", mode="min", patience=10)
     tb = TensorBoard(log_dir='./logs/' + PREDICTION_FOLDER + '/fold_%i'%i, write_graph=True)
     callbacks_list = [checkpoint, early, tb]
     print("#"*50)
@@ -665,6 +664,8 @@ test['label'] = predicted_labels
 test[['fname', 'label']].to_csv("./freesound-prediction-data-2d-conv-reduced-lr/2d_conv_ensembled_submission.csv", index=False)
 
 
+#### ==================== ensemple ===================== ####
+
 # <a id="1d_2d_ensembling"></a>
 # ## <center>5. Ensembling 1D Conv and 2D Conv Predictions</center>
 
@@ -684,6 +685,8 @@ test = pd.read_csv('./sample_submission.csv')
 test['label'] = predicted_labels
 test[['fname', 'label']].to_csv("1d_2d_ensembled_submission.csv", index=False)
 
+
+#### ==================== conclusion ===================== ####
 
 # <a id="conclusion"></a>
 # ## <center>Results and Conclusion</center>
