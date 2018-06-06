@@ -215,9 +215,9 @@ for i, (train_split, val_split) in enumerate(skf):
     test[['label']].to_csv(PREDICTION_FOLDER + "/predictions_%d.csv"%i)
 
 # #### Ensembling 2D Conv Predictions
-pred_list2 = []
+pred_list = []
 for i in range(config.n_folds):
-    pred_list2.append(np.load("./"+PREDICTION_FOLDER+"/test_predictions_%d.npy"%i))
+    pred_list.append(np.load("./"+PREDICTION_FOLDER+"/test_predictions_%d.npy"%i))
 prediction = np.ones_like(pred_list[0])
 for pred in pred_list:
     prediction = prediction*pred
