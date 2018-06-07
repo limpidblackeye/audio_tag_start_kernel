@@ -112,13 +112,15 @@ def get_2d_conv_model(config):
 
     model = models.Model(inputs=inp, outputs=out)
     # opt = optimizers.Adam(config.learning_rate)
-    opt = optimizers.SGD(lr=config.learning_rate, momentum=0, decay=0.95, nesterov=True)
+    opt = optimizers.Adam(lr=config.learning_rate, beta_1=0.9, beta_2=0.999, epsilon=1e-08)
+
+    # opt = optimizers.SGD(lr=config.learning_rate, momentum=0, decay=0.95, nesterov=True)
 
     model.compile(optimizer=opt, loss=losses.categorical_crossentropy, metrics=['acc'])
     return model
 
 config = Config(sampling_rate=44100, audio_duration=2, n_folds=10, 
-                learning_rate=0.01, use_mfcc=True, n_mfcc=40)
+                learning_rate=0.001, use_mfcc=True, n_mfcc=40)
 if not COMPLETE_RUN:
     config = Config(sampling_rate=44100, audio_duration=2, n_folds=2, 
                     max_epochs=1, use_mfcc=True, n_mfcc=40)
