@@ -88,21 +88,25 @@ def get_2d_conv_model(config):
     x = BatchNormalization()(x)
     x = Activation("relu")(x)
     x = MaxPool2D()(x)
+    x = Dropout(rate=0.1)(x)
+
+    x = Convolution2D(32, (4,10), padding="same")(x)
+    x = BatchNormalization()(x)
+    x = Activation("relu")(x)
+    x = MaxPool2D()(x)
+    x = Dropout(rate=0.1)(x)
     
     x = Convolution2D(32, (4,10), padding="same")(x)
     x = BatchNormalization()(x)
     x = Activation("relu")(x)
     x = MaxPool2D()(x)
+    x = Dropout(rate=0.1)(x)
     
     x = Convolution2D(32, (4,10), padding="same")(x)
     x = BatchNormalization()(x)
     x = Activation("relu")(x)
     x = MaxPool2D()(x)
-    
-    x = Convolution2D(32, (4,10), padding="same")(x)
-    x = BatchNormalization()(x)
-    x = Activation("relu")(x)
-    x = MaxPool2D()(x)
+    x = Dropout(rate=0.1)(x)
 
     x = Flatten()(x)
     x = Dense(64)(x)
