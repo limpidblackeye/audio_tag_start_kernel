@@ -16,7 +16,6 @@ from keras.utils import Sequence, to_categorical
 
 from keras.layers import (Convolution2D, GlobalAveragePooling2D, BatchNormalization, Flatten,
                           GlobalMaxPool2D, MaxPool2D, concatenate, Activation)
-from keras.utils import Sequence, to_categorical
 from keras import backend as K
 
 from sklearn.cross_validation import StratifiedKFold
@@ -88,25 +87,25 @@ def get_2d_conv_model(config):
     x = BatchNormalization()(x)
     x = Activation("relu")(x)
     x = MaxPool2D()(x)
-    x = Dropout(rate=0.3)(x)
+    x = Dropout(rate=0.5)(x)
 
     x = Convolution2D(32, (4,10), padding="same")(x)
     x = BatchNormalization()(x)
     x = Activation("relu")(x)
     x = MaxPool2D()(x)
-    x = Dropout(rate=0.3)(x)
+    x = Dropout(rate=0.5)(x)
     
     x = Convolution2D(32, (4,10), padding="same")(x)
     x = BatchNormalization()(x)
     x = Activation("relu")(x)
     x = MaxPool2D()(x)
-    x = Dropout(rate=0.2)(x)
+    x = Dropout(rate=0.5)(x)
     
     x = Convolution2D(32, (4,10), padding="same")(x)
     x = BatchNormalization()(x)
     x = Activation("relu")(x)
     x = MaxPool2D()(x)
-    x = Dropout(rate=0.2)(x)
+    x = Dropout(rate=0.5)(x)
 
     x = Flatten()(x)
     x = Dense(64)(x)
