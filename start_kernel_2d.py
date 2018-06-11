@@ -22,7 +22,7 @@ from sklearn.cross_validation import StratifiedKFold
 np.random.seed(1001)
 
 COMPLETE_RUN = True
-data_verified = 1
+data_verified = 0
 
 ###====================================================###
 ###=================== data load ======================###
