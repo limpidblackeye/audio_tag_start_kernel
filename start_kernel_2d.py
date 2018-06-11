@@ -22,14 +22,16 @@ from sklearn.cross_validation import StratifiedKFold
 np.random.seed(1001)
 
 COMPLETE_RUN = True
+data_verified = 1
 
 ###====================================================###
 ###=================== data load ======================###
 ###====================================================###
 
-train = pd.read_csv("../../data/train.csv")
+train_all = pd.read_csv("../../data/train.csv")
 test = pd.read_csv("./sample_submission.csv")
 train.head()
+train = train_all[train_all['manually_verified']==data_verified]
 print("Number of training examples=", train.shape[0], "  Number of classes=", len(train.label.unique()))
 print(train.label.unique())
 
@@ -55,7 +57,6 @@ class Config(object):
         self.n_folds = n_folds
         self.learning_rate = learning_rate
         self.max_epochs = max_epochs
-
         self.audio_length = self.sampling_rate * self.audio_duration
         if self.use_mfcc:
             self.dim = (self.n_mfcc, 1 + int(np.floor(self.audio_length/512)), 1)
@@ -87,25 +88,25 @@ def get_2d_conv_model(config):
     x = BatchNormalization()(x)
     x = Activation("relu")(x)
     x = MaxPool2D()(x)
-    x = Dropout(rate=0.5)(x)
+    x = Dropout(rate=0.3)(x)
 
     x = Convolution2D(32, (4,10), padding="same")(x)
     x = BatchNormalization()(x)
     x = Activation("relu")(x)
     x = MaxPool2D()(x)
-    x = Dropout(rate=0.5)(x)
+    x = Dropout(rate=0.3)(x)
     
     x = Convolution2D(32, (4,10), padding="same")(x)
     x = BatchNormalization()(x)
     x = Activation("relu")(x)
     x = MaxPool2D()(x)
-    x = Dropout(rate=0.5)(x)
+    x = Dropout(rate=0.3)(x)
     
     x = Convolution2D(32, (4,10), padding="same")(x)
     x = BatchNormalization()(x)
     x = Activation("relu")(x)
     x = MaxPool2D()(x)
-    x = Dropout(rate=0.5)(x)
+    x = Dropout(rate=0.3)(x)
 
     x = Flatten()(x)
     x = Dense(64)(x)
@@ -141,7 +142,6 @@ def prepare_data(df, config, data_dir):
         if ".wav" in str(fname):
             file_path = data_dir + fname
             data, _ = librosa.core.load(file_path, sr=config.sampling_rate, res_type="kaiser_fast")
-
             # Random offset / Padding
             if len(data) > input_length:
                 max_offset = len(data) - input_length
@@ -154,11 +154,10 @@ def prepare_data(df, config, data_dir):
                 else:
                     offset = 0
                 data = np.pad(data, (offset, input_length - len(data) - offset), "constant")
-
             data = librosa.feature.mfcc(data, sr=config.sampling_rate, n_mfcc=config.n_mfcc)
             data = np.expand_dims(data, axis=-1)
             X[i,] = data
-    return X
+    return X 
 
 print("start preparing data ...")
 X_train = prepare_data(train, config, '../../data/audio_train/')
@@ -184,7 +183,7 @@ def audio_norm(data):
 ###====================================================###
 
 # PREDICTION_FOLDER = "predictions_2d_conv"
-PREDICTION_FOLDER = "freesound-prediction-data-2d-conv-reduced-lr"
+PREDICTION_FOLDER = "freesound-prediction-data-2d-conv-reduced-lr_"+str(data_verified)
 if not os.path.exists(PREDICTION_FOLDER):
     os.mkdir(PREDICTION_FOLDER)
 if os.path.exists('logs/' + PREDICTION_FOLDER):
