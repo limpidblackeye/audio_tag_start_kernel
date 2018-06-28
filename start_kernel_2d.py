@@ -189,7 +189,7 @@ X_test = prepare_data(test, config, '../../data/audio_test/')
 # y_train = to_categorical(train.label_idx, num_classes=config.n_classes)
 
 def prepare_augment_data(df, config, data_dir):
-    X = np.empty(shape=(df.shape[0], config.dim[0], config.dim[1], 1))
+    X = np.empty(shape=(2*df.shape[0], config.dim[0], config.dim[1], 1))
     input_length = config.audio_length
     data_all = []
     y_all = to_categorical(df.label_idx, num_classes=config.n_classes)
