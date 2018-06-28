@@ -213,8 +213,8 @@ def prepare_augment_data(df, config, data_dir):
             
             data_all.append(data)
 
-        tmp_X, tmp_y = mixup(data_all, y_all, alpha=1)
-        x_all, y_train = np.r_[data_all, tmp_X], np.r_[y_train, tmp_y]
+        tmp_X, tmp_y = mixup(np.array(data_all), np.array(y_all), alpha=1)
+        x_all, y_train = np.r_[np.array(data_all), tmp_X], np.r_[y_train, tmp_y]
         for i in x_all:
             data = librosa.feature.mfcc(x_all[i], sr=config.sampling_rate, n_mfcc=config.n_mfcc)
             data = np.expand_dims(data, axis=-1)
