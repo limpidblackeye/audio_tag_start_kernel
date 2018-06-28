@@ -30,7 +30,8 @@ data_verified = 0
 
 train_all = pd.read_csv("../../data/train.csv")
 test = pd.read_csv("./sample_submission.csv")
-train = train_all[train_all['manually_verified']==data_verified]
+# use only the manually_verified data
+# train = train_all[train_all['manually_verified']==data_verified]
 train.head()
 
 print("Number of training examples=", train.shape[0], "  Number of classes=", len(train.label.unique()))
@@ -41,6 +42,7 @@ label_idx = {label: i for i, label in enumerate(LABELS)}
 train.set_index("fname", inplace=True)
 test.set_index("fname", inplace=True)
 train["label_idx"] = train.label.apply(lambda x: label_idx[x])
+
 
 ###====================================================###
 ###==================== 2d model ======================###
@@ -130,6 +132,26 @@ if not COMPLETE_RUN:
     config = Config(sampling_rate=44100, audio_duration=2, n_folds=2, 
                     max_epochs=1, use_mfcc=True, n_mfcc=40)
 
+###====================================================###
+###================ data agmentation ==================###
+###====================================================###
+
+def mixup(data, one_hot_labels, alpha=1, debug=False):
+    np.random.seed(42)
+
+    batch_size = len(data)
+    weights = np.random.beta(alpha, alpha, batch_size)
+    index = np.random.permutation(batch_size)
+    x1, x2 = data, data[index]
+    x = np.array([x1[i] * weights [i] + x2[i] * (1 - weights[i]) for i in range(len(weights))])
+    y1 = np.array(one_hot_labels).astype(np.float)
+    y2 = np.array(np.array(one_hot_labels)[index]).astype(np.float)
+    y = np.array([y1[i] * weights[i] + y2[i] * (1 - weights[i]) for i in range(len(weights))])
+    if debug:
+        print('Mixup weights', weights)
+    return x, y
+
+
 
 ###====================================================###
 ###================== prepare data ====================###
@@ -161,9 +183,44 @@ def prepare_data(df, config, data_dir):
     return X 
 
 print("start preparing data ...")
-X_train = prepare_data(train, config, '../../data/audio_train/')
+# X_train = prepare_data(train, config, '../../data/audio_train/')
 X_test = prepare_data(test, config, '../../data/audio_test/')
-y_train = to_categorical(train.label_idx, num_classes=config.n_classes)
+# y_train = to_categorical(train.label_idx, num_classes=config.n_classes)
+
+def prepare_augment_data(df, config, data_dir):
+    X = np.empty(shape=(df.shape[0], config.dim[0], config.dim[1], 1))
+    input_length = config.audio_length
+    data_all = []
+    y_all = to_categorical(df.label_idx, num_classes=config.n_classes)
+    for i, fname in enumerate(df.index):
+        # print(fname)
+        if ".wav" in str(fname):
+            file_path = data_dir + fname
+            data, _ = librosa.core.load(file_path, sr=config.sampling_rate, res_type="kaiser_fast")
+            # Random offset / Padding
+            if len(data) > input_length:
+                max_offset = len(data) - input_length
+                offset = np.random.randint(max_offset)
+                data = data[offset:(input_length+offset)]
+            else:
+                if input_length > len(data):
+                    max_offset = input_length - len(data)
+                    offset = np.random.randint(max_offset)
+                else:
+                    offset = 0
+                data = np.pad(data, (offset, input_length - len(data) - offset), "constant")
+            
+            data_all.append(data)
+
+        tmp_X, tmp_y = mixup(x_all, y_all, alpha=1)
+        x_all, y_train = np.r_[data_all, tmp_X], np.r_[y_train, tmp_y]
+        for i in x_all:
+            data = librosa.feature.mfcc(x_all[i], sr=config.sampling_rate, n_mfcc=config.n_mfcc)
+            data = np.expand_dims(data, axis=-1)
+            X[i,] = data
+    return X, y_train
+
+X_train,y_train = prepare_augment_data(train, config, '../../data/audio_train/')
 
 # #### Normalization
 mean = np.mean(X_train, axis=0)
@@ -178,6 +235,7 @@ def audio_norm(data):
     min_data = np.min(data)
     data = (data-min_data)/(max_data-min_data+1e-6)
     return data-0.5
+
 
 ###====================================================###
 ###=============== 2D Conv on MFCC ====================###
