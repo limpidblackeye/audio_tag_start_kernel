@@ -213,7 +213,7 @@ def prepare_augment_data(df, config, data_dir):
             
             data_all.append(data)
 
-        tmp_X, tmp_y = mixup(x_all, y_all, alpha=1)
+        tmp_X, tmp_y = mixup(data_all, y_all, alpha=1)
         x_all, y_train = np.r_[data_all, tmp_X], np.r_[y_train, tmp_y]
         for i in x_all:
             data = librosa.feature.mfcc(x_all[i], sr=config.sampling_rate, n_mfcc=config.n_mfcc)
@@ -221,6 +221,7 @@ def prepare_augment_data(df, config, data_dir):
             X[i,] = data
     return X, y_train
 
+print("start preparing augmented data ...")
 X_train,y_train = prepare_augment_data(train, config, '../../data/audio_train/')
 
 # #### Normalization
