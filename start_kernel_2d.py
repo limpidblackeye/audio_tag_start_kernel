@@ -32,6 +32,7 @@ train_all = pd.read_csv("../../data/train.csv")
 test = pd.read_csv("./sample_submission.csv")
 # use only the manually_verified data
 # train = train_all[train_all['manually_verified']==data_verified]
+train = train_all
 train.head()
 
 print("Number of training examples=", train.shape[0], "  Number of classes=", len(train.label.unique()))
