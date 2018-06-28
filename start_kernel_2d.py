@@ -213,12 +213,14 @@ def prepare_augment_data(df, config, data_dir):
             
             data_all.append(data)
 
-        tmp_X, tmp_y = mixup(np.array(data_all), np.array(y_all), alpha=1)
-        x_all, y_train = np.r_[np.array(data_all), tmp_X], np.r_[y_all, tmp_y]
-        for i in x_all:
-            data = librosa.feature.mfcc(i, sr=config.sampling_rate, n_mfcc=config.n_mfcc)
-            data = np.expand_dims(data, axis=-1)
-            X[i,] = data
+    tmp_X, tmp_y = mixup(np.array(data_all), np.array(y_all), alpha=1)
+    x_all, y_train = np.r_[np.array(data_all), tmp_X], np.r_[y_all, tmp_y]
+    j=0
+    for sub_x_all in x_all:
+        data = librosa.feature.mfcc(sub_x_all, sr=config.sampling_rate, n_mfcc=config.n_mfcc)
+        data = np.expand_dims(data, axis=-1)
+        X[j,] = data
+        j += 1
     return X, y_train
 
 print("start preparing augmented data ...")
